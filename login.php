@@ -1,21 +1,32 @@
 <?php
-    $salt = "d9bvl2whd6kvjldw78cd";
-
-    if ( isset($_COOKIE['loggedIn']) ){
-        
-        $cookie = $_COOKIE['loggedIn'];
-        $arrCookie = explode(",", $cookie);
-
-        if( md5($arrCookie[0].$salt) == $arrCookie[1] ){
-            //is logged in
-        }else{
-            //send back
-            header("Location: login.php");
-        }
+//make function to validate user
+  function canLogIn($username, $password){
+    if( $username != "Rossi" || $password != "letsgo"){
+      //wrong
+      return false;
     }else{
-         //send back
-         header("Location: login.php");
+      //true
+      return true;
     }
+  }
+//get input of form
+  if( !empty( $_POST ) ){
+    $username = $_POST["username"];
+    $password = $_POST["password"];
+
+    if( canLogIn($username, $password) ){
+      //succes
+
+      $salt = "d9bvl2whd6kvjldw78cd";
+      $cookieVal = $username . "," . md5($username . $salt);
+      setcookie("loggedIn", $cookieVal, time()+60*60*24*30);
+      header("Location: index.php");
+
+    }else{
+      //failed
+      $error = true;
+    }
+  }
 ?><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,29 +37,31 @@
     <title>Log in - Twitch</title>
 </head>
 <body>
-<header>
+<header class="hidden">
   <nav class="nav">
     <a href="#">Browse</a>
     <a href="#">Get desktop</a>
     <a href="#">Try prime</a>
     <a href="#" class="loggedIn">
       <div class="user--avatar"><img src="https://images.unsplash.com/photo-1502980426475-b83966705988?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&s=ddcb7ec744fc63472f2d9e19362aa387" alt=""></div>
-      <h3 class="user--name"><?php echo $arrCookie[0]; ?></h3>
+      <h3 class="user--name">Username here</h3>
       <span class="user--status">Watching dakotaz</span>
     </a>
     <a href="logout">Log out?</a>
   </nav>    
 </header>
 
-<div id="app" class="hidden">
+<div id="app">
     <h1>Log in to Twitch</h1>
     <nav class="nav--login">
         <a href="#" id="tabLogin">Log in</a>
         <a href="#" id="tabSignIn">Sign up</a>
     </nav>
-  
-    <div class="alert hidden">That password was incorrect. Please try again</div>
-  
+
+  <?php if( isset($error) ) : //show error on incorrect validation ?>
+    <div class="alert">That password was incorrect. Please try again</div>
+  <?php endif; ?>
+
   <div class="form form--login">
     <form action="" method="post">
       <label for="username">Username</label>
